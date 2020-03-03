@@ -1,0 +1,32 @@
+---
+title: "03-03"
+author: "Jason Yoo"
+date: "3/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(janitor)
+library(gt)
+```
+
+```{r}
+enrollment_2020 <- read_excel("2020.xlsx", skip=3) %>% clean_names() %>% filter(!is.na(course_name))
+enrollment_2019 <- read_excel("2019.xlsx", skip=3) %>% clean_names() %>% filter(!is.na(course_name))
+```
+
+```{r}
+new <- enrollment_2020 %>% left_join(enrollment_2019, by=c("course_id"), suffix = c("_2020", "_2019")) %>% filter(is.na(course_title_2019)) %>% arrange(desc(total_2020)) %>% select(course_id, course_title_2020, course_name_2020, course_department_2020, total_2020) %>% slice(1:5)
+new
+```
+
+```{r}
+combined <- anti_join(enrollment_2020, enrollment_2019, by=c("course_id")) %>% arrange(desc(total)) %>% slice(1:5) %>% select(course_id, course_title, course_name, course_department, total) %>% gt()
+combined
+```
